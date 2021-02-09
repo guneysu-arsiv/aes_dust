@@ -10,6 +10,8 @@ else ifeq ($(MACHINE), aarch64)
 	SRC := asm/arm64/ax.s
 endif
 
+all: clean
+	gcc -Wall -Os -DCTR -DOFB test128.c aes.c -otest128
 mc: clean
 	gcc -Wall -Os mctest.c aes.c -omctest
 ecb: clean

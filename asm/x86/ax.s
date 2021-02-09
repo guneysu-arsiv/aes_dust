@@ -27,7 +27,7 @@
 // -----------------------------------------------
 // AES-128 Encryption in x86 assembly
 //
-// size: 205 bytes for ECB, 272 for CTR
+// size: 188 bytes for ECB, 255 for CTR
 //
 // global calls use cdecl convention
 //
@@ -35,13 +35,13 @@
 
     .intel_syntax noprefix
     
-    .global aes_ecb_asm
-    .global _aes_ecb_asm
+    .global aes_ecb
+    .global _aes_ecb
     // *****************************
-    // void aes_ecb_asm(void *s);
+    // void aes_ecb(void *s);
     // *****************************
-_aes_ecb_asm:
-aes_ecb_asm:
+_aes_ecb:
+aes_ecb:
     pusha
     xor    ecx, ecx           # ecx = 0
     mul    ecx                # eax = 0, edx = 0
@@ -120,6 +120,7 @@ shift_rows:
     sub    edx, 3
     and    edx, 15
     jnz    shift_rows
+    popa
     // *****************************
     // if(c!=108){
     cmp    al, 108

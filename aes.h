@@ -39,12 +39,34 @@
 #error "AES-256 is not supported by the assembly code."
 #endif
 
-#ifndef AES_BIG_ENDIAN
-  #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-    #define AES_BIG_ENDIAN 1
-  #elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-    #define AES_BIG_ENDIAN 0
-  #endif
+#if !defined(__LITTLE_ENDIAN__) && !defined(__BIG_ENDIAN__)
+#  if defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__) || \
+      defined(__BYTE_ORDER) && (__BYTE_ORDER == __BIG_ENDIAN) || \
+      defined(_BYTE_ORDER) && (_BYTE_ORDER == _BIG_ENDIAN) || \
+      defined(BYTE_ORDER) && (BYTE_ORDER) == BIG_ENDIAN || \
+      defined(_BIG_ENDIAN) || \
+      defined(__ARMEB__) || defined(__THUMBEB__) || defined(__AARCH64EB__) || \
+      defined(_MIBSEB) || defined(__MIBSEB) || defined(__MIBSEB__) || \
+      defined(_M_PPC)
+     //#warning "__BIG_ENDIAN__"
+#    define __BIG_ENDIAN__
+#  endif
+#  if defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) /* gcc */ || \
+        defined(__BYTE_ORDER) && (__BYTE_ORDER == __LITTLE_ENDIAN) /* linux header */ || \
+        defined(_BYTE_ORDER) && (_BYTE_ORDER == _LITTLE_ENDIAN) || \
+        defined(BYTE_ORDER) && (BYTE_ORDER == LITTLE_ENDIAN) /* mingw header */ ||  \
+        defined(_LITTLE_ENDIAN) || /* solaris */ \
+        defined(__ARMEL__) || defined(__THUMBEL__) || defined(__AARCH64EL__) || \
+        defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__) || \
+        defined(_M_IX86) || defined(_M_X64) || defined(_M_IA64) || /* msvc for intel processors */ \
+        defined(_M_ARM) /* msvc code on arm executes in little endian mode */
+     //#warning "__LITTLE_ENDIAN__"
+#    define __LITTLE_ENDIAN__
+#  endif
+#endif
+
+#if defined(__LITTLE_ENDIAN__) && defined(__BIG_ENDIAN__)
+#  error Both __LITTLE_ENDIAN__ and __BIG_ENDIAN__ have been defined!!!
 #endif
 
 typedef unsigned char u8;
@@ -53,7 +75,7 @@ typedef char s8;
 #if AES_INT_LEN == 1
   typedef unsigned char u32;
 #else
-  #if AES_BIG_ENDIAN
+  #if defined(__BIG_ENDIAN__)
     #define R(v,n)(((v)<<(n))|((v)>>(32-(n))))
     #define SHF_C 24
   #else
@@ -69,7 +91,7 @@ extern "C" {
 
   #ifdef ASM
     // s should point to 128-bit data and 128-bit key
-    void aes_ecb_asm(void *s);
+    void aes_ecb(void *s);
   #else
   // mk should point to a 128-bit or 256-bit key
   // data should point to a 128-bit block of plaintext to encrypt
@@ -81,6 +103,9 @@ extern "C" {
   // data is the plaintext or ciphertext
   // mk is the 128-bit or 256-bit master key
   void aes_ctr(u32 len, void *ctr, void *data, void *mk); 
+  
+  // iv is the 128-bit initialisation vector.
+  void aes_ofb(u32 len, void *iv, void *data, void *mk); 
   
 #ifdef __cplusplus
 }

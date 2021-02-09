@@ -49,7 +49,7 @@ int main(void) {
           memcpy(s, data, 16);
           memcpy(&s[16], key, 16);
           
-          aes_ecb_asm(s);
+          aes_ecb(s);
           memcpy(data, s, 16);
         #else
           aes_ecb(key, data);
