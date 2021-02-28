@@ -1,5 +1,5 @@
 
-// monte carlo test for AES-128 and AES-256 in ECB mode
+// Monte Carlo test for AES-128 and AES-256 in ECB mode
 // odzhan
 
 #include <stdio.h>
@@ -43,7 +43,17 @@ int main(void) {
         #if AES_KEY_LEN == 32
           memcpy(&data[16], data, 16);
         #endif
-        aes_ecb(key, data);
+        
+        #ifdef ASM
+          uint8_t s[32];
+          memcpy(s, data, 16);
+          memcpy(&s[16], key, 16);
+          
+          aes_ecb(s);
+          memcpy(data, s, 16);
+        #else
+          aes_ecb(key, data);
+        #endif
       }
       #if AES_KEY_LEN == 32
         for(j=0;j<16;j++) key[j] ^= data[j+16];

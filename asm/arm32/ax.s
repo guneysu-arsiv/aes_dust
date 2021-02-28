@@ -30,7 +30,7 @@
     .arch armv7-a
     .text
 
-    .global E
+    .global aes_ecb_asm
 
 // *****************************
 // Multiplication over GF(2**8)
@@ -82,9 +82,9 @@ SB2:
     pop      {pc}
     
 // *****************************
-// void E(void *s);
+// void aes_ecb(void *s);
 // *****************************
-E:
+aes_ecb_asm:
     push    {r0-r12,lr}
     sub     sp, sp, #32
     
@@ -137,7 +137,7 @@ L2:
     mov     r4, r7
     
     // SubBytes and ShiftRows
-    // F(16)((B*)x)[(i%4)+(((i/4)-(i%4))%4)*4]=S(s[i]);
+    // F(16)((u8*)x)[w]=S(((u8*)s)[i]), w=(w-3)&15;
 L3:
     ldrb    r10, [r0, r2]
     bl      S
